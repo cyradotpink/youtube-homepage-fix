@@ -1,0 +1,4 @@
+/web-ext-artifacts
+/src/.amo-upload-uuid
+/node_modules
+/secret.json
