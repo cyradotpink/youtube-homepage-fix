@@ -9,7 +9,9 @@
   },
   "description": "Makes the number of video items per row on YouTube's homepage configurable",
   "icons": {
-    "48": "icons/icon.png"
+    "32": "icons/icon-32.png",
+    "64": "icons/icon-64.png",
+    "128": "icons/icon-128.png"
   },
   "permissions": ["storage"],
   "action": {
@@ -19,11 +21,6 @@
     "page": "options.html"
   },
   "content_scripts": [
-    {
-      "matches": ["*://*.youtube.com/*"],
-      "js": ["fix.js"],
-      "world": "MAIN"
-    },
     {
       "matches": ["*://*.youtube.com/*"],
       "js": ["content.js"]

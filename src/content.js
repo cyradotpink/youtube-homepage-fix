@@ -1,23 +1,35 @@
-// This script is the glue that gives the fix.js page script access
-// to our configuration stored in extension storage
-
+const gridSelector = "[page-subtype=home]>#primary>:first-child";
 const config = {};
+const data = {};
+
+function setProperty(property, value, ...rest) {
+    if (
+        property == "--ytd-rich-grid-items-per-row" &&
+        document.querySelector(gridSelector)?.style === this
+    ) {
+        // We save the amount of columns that youtube wants right now so we have the value
+        // if the user clears the override later
+        data.ytDesiredItemsPerRow = value;
+        let override = config.homeColumns ?? null;
+        if (override !== null) {
+            console.log(
+                `Youtube wants to show ${value} items per row; Showing ${override} instead!`,
+            );
+            value = override;
+        }
+    }
+    // This looks recursive but isn't (because of Xray vision)
+    return this.setProperty(property, value, ...rest);
+}
+
+let stylePrototype = CSSStyleDeclaration.prototype.wrappedJSObject;
+stylePrototype.setProperty = exportFunction(setProperty, stylePrototype);
 
 function update() {
-    window.wrappedJSObject.updateHomepageFixConfig(cloneInto(config, window));
-    let override = config.homeColumns;
-    if ((override ?? null) === null) {
-        override = window.wrappedJSObject.homepageFixData.ytDesiredItemsPerRow;
-    }
-    if ((override ?? null) === null) {
-        return;
-    }
-    // Immediately update layout on configuration change.
-    // Note that the "setProperty" here won't be intercepted by our patch
-    // in fix.js because we're accessing the document through Xray vision:
-    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Sharing_objects_with_page_scripts#xray_vision_in_firefox
-    window.document
-        .querySelector("[page-subtype=home]>#primary>:first-child")
+    let override = config.homeColumns ?? data.ytDesiredItemsPerRow ?? null;
+    if (override === null) return;
+    document
+        .querySelector(gridSelector)
         ?.style.setProperty("--ytd-rich-grid-items-per-row", override);
 }
 
