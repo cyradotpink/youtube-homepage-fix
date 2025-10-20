@@ -4,7 +4,7 @@ window.homepageFixConfig = {};
 window.homepageFixData = {};
 
 // if setPropertyOriginal is already defined, that means the extension was probably reloaded
-// and setProperty is already patched. We don't want to do that again.
+// and setProperty is already patched. We don't want to "save" it again.
 if (CSSStyleDeclaration.prototype.setPropertyOriginal === undefined) {
     CSSStyleDeclaration.prototype.setPropertyOriginal =
         CSSStyleDeclaration.prototype.setProperty;
@@ -16,22 +16,26 @@ window.updateHomepageFixConfig = function (config) {
 };
 
 // Patch style.setProperty calls to intercept youtube attempting to set the layout
-CSSStyleDeclaration.prototype.setProperty = function (...args) {
+CSSStyleDeclaration.prototype.setProperty = function (
+    property,
+    value,
+    ...rest // Shouldn't really get a rest but we technically can so let's be clean and pass it on
+) {
     if (
-        args[0] == "--ytd-rich-grid-items-per-row" &&
-        document.querySelector("[page-subtype=home]>#primary")?.children[0]
+        property == "--ytd-rich-grid-items-per-row" &&
+        document.querySelector("[page-subtype=home]>#primary>:first-child")
             ?.style === this
     ) {
         // We save the amount of columns that youtube wants right now so we have the value
         // if the user clears the override later
-        homepageFixData.ytDesiredItemsPerRow = args[1];
+        homepageFixData.ytDesiredItemsPerRow = value;
         let override = homepageFixConfig.homeColumns;
-        if (typeof override === "string") {
+        if ((override ?? null) !== null) {
             console.log(
-                `Youtube wants to show ${args[1]} items per row; Showing ${override} instead!`,
+                `Youtube wants to show ${value} items per row; Showing ${override} instead!`,
             );
-            args[1] = override;
+            value = override;
         }
     }
-    return this.setPropertyOriginal.apply(this, args);
+    return this.setPropertyOriginal.apply(this, [property, value, ...rest]);
 };

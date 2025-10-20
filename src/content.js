@@ -6,10 +6,10 @@ const config = {};
 function update() {
     window.wrappedJSObject.updateHomepageFixConfig(cloneInto(config, window));
     let override = config.homeColumns;
-    if (!(typeof override === "string")) {
+    if ((override ?? null) === null) {
         override = window.wrappedJSObject.homepageFixData.ytDesiredItemsPerRow;
     }
-    if (!(typeof override === "string")) {
+    if ((override ?? null) === null) {
         return;
     }
     // Immediately update layout on configuration change.
@@ -17,11 +17,8 @@ function update() {
     // in fix.js because we're accessing the document through Xray vision:
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Sharing_objects_with_page_scripts#xray_vision_in_firefox
     window.document
-        .querySelector("[page-subtype=home]>#primary")
-        ?.children[0]?.style.setProperty(
-            "--ytd-rich-grid-items-per-row",
-            override,
-        );
+        .querySelector("[page-subtype=home]>#primary>:first-child")
+        ?.style.setProperty("--ytd-rich-grid-items-per-row", override);
 }
 
 browser.storage.local.get(["homeColumns"]).then((result) => {
