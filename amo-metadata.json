@@ -1,0 +1,9 @@
+{
+  "version": {
+    "license": "MIT"
+  },
+  "categories": ["appearance"],
+  "summary": {
+    "en-US": "Configure the number of video items per row on YouTube's homepage."
+  }
+}
